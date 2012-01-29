@@ -141,5 +141,7 @@
       unset($tableDefinition);
 
     }
+  
+  }
 
 ?>
