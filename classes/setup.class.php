@@ -15,13 +15,13 @@
 
       $tableName = "download_items";
 
-      $tableDefintion[$i]['name'] = "downloadItemID";
-      $tableDefintion[$i]['definition'] = "INT NOT NULL AUTO_INCREMENT";
+      $tableDefinition[$i]['name'] = "downloadItemID";
+      $tableDefinition[$i]['definition'] = "INT NOT NULL AUTO_INCREMENT";
 
       $tableDefinition[++$i]['name'] = "name";
       $tableDefinition[$i]['definition'] = "TEXT";
  
-      $tableDefinition[++$i]['name'] = "description":
+      $tableDefinition[++$i]['name'] = "description";
       $tableDefinition[$i]['definition'] = "TEXT";
 
       $tableDefinition[++$i]['name'] = "dateAdded";
@@ -73,7 +73,7 @@
 
       $i = 0;
 
-      $tableName = "download_fileInfo":
+      $tableName = "download_fileInfo";
 
       $tableDefinition[$i]['name'] = "fileID";
       $tableDefinition[$i]['definition'] = "INT NOT NULL AUTO_INCREMENT";
@@ -139,6 +139,44 @@
 
       $dbTools->newTable($tableName,$tableDefinition,$primaryKey);
       unset($tableDefinition);
+
+    }
+
+    public function populateTables() {
+
+      $db  = new dbConn();
+
+      $adminDBTools = new adminDBTools();
+
+      if ($db->checkExists("version","module","download")) {
+
+        echo("Version already populated!<br />");
+
+      } else {
+
+        if ($db->insert("version","module,version,theme","'download','1.0.0','default'")) {
+
+          echo("Version populated!<br />");
+        
+        }
+
+      }
+
+      $adminDBTools->newContent("Download Module","download/admin/downloadModule.php","main");
+
+      if ($db->checkExists("dContent","title","Downloads")) {
+
+        echo("dContent already populated with downloads link");
+
+      } else {
+
+        if ($db->insert("dContent","title,linkName,directLink","'Downloads','Downloads','download/index.php'")) {
+
+          echo("dContent populated with Downloads lnik");
+  
+        }
+
+      }
 
     }
   
