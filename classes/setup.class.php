@@ -163,6 +163,7 @@
       }
 
       $adminDBTools->newContent("Download Module","download/admin/downloadModule.php","main");
+      $adminDBTools->newContent("Manage Categories","download/admin/manageDownloadCategories.php","Download Module");
 
       if ($db->checkExists("dContent","title","Downloads")) {
 
