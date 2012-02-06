@@ -21,6 +21,49 @@
 
     }
 
+    public function countItemsInCategoryRecurring($categoryID) {
+
+      $childCategoryArray = $this->cM->getChildCategoriesRecurring($categoryID);
+
+      $field = "COUNT(wikiPageID) as count";
+      $table = "wiki_pageCategories";
+
+      $i = 0;
+
+      foreach ($childCategoryArray as $childCategoryID) {
+
+        $where[$i]['joinOperator'] = "OR";
+        $where[$i]['column'] = "wikiCategoryID";
+        $where[$i]['value'] = $childCategoryID;
+
+        $i++;
+
+      }
+
+      $where[$i]['joinOperator'] = "OR";
+      $where[$i]['column'] = "wikiCategoryID";
+      $where[$i]['value'] = $categoryID;
+
+      $countResult = $this->pdoConn->select($field,$table,$where);
+
+      return $countResult[0]['count'];
+
+    }
+
+    public function getCategoryPath($categoryID) {
+
+      $array = array();
+
+      return $this->cM->getCategoryPath($categoryID);
+
+    }
+
+    public function getChildCategories($categoryID) {
+
+      return $this->cM->getChildCategories($categoryID);
+
+    }
+
     public function renderCategorySelectOptions() {
 
       $categoryArray = $this->cM->makeCategoryTreeArray();
