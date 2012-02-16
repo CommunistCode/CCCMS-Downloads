@@ -82,3 +82,10 @@
   }
 
 ?>
+
+<div class='linkHeader'>Actions</div>
+
+<ul>
+  <li><a href='uploadItem.php'>Upload New Image</a></li>
+  <li><a href='updateVersion.php'>Add New Version</a></li>
+</ul>
