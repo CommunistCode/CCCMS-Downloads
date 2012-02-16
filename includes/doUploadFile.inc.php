@@ -8,6 +8,7 @@
   $downloadTools->insertNewTorrent(unserialize($_SESSION['torrent']));
 
   unset($_SESSION['torrent']);
+  unset($_SESSION['originalFilename']);
 
 ?>
 

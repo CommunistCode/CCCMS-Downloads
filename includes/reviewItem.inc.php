@@ -16,7 +16,7 @@
   } else if (isset($_SESSION['torrent'])) {
 
     $torrent = unserialize($_SESSION['torrent']);
-    $torrentDecoder = new torrentDecoder($torrent->getLocation());
+    $torrentDecoder = new torrentDecoder($torrent->getFullPath());
 
   } else {
 
@@ -97,7 +97,7 @@
   $member = unserialize($_SESSION['member']);
 
   $torrent->setName($_POST['itemName']);
-  $torrent->setDesc($_POST['itemDesc']);
+  $torrent->setDescription($_POST['itemDesc']);
   $torrent->setDateUploaded(time());
   $torrent->setDeveloper($_POST['itemDeveloper']);
   $torrent->setVersionExternal($_POST['itemVersion']);
@@ -115,15 +115,18 @@
 
   }
 
-  $torrentArray = $torrent->getInfoArray();
-  $torrentInfo = $torrent->getInfoArray();
-
 ?>
 
 <p>Please look over the following information and ensure it is correct, if you wish to change something then click the edit button.</p>
 <br />
 
-<?php include("includes/torrentInfoBox.inc.php"); ?>
+<?php 
+
+  $args = array("torrent"=>$torrent);
+
+  echo($pageTools->render("includes/torrentInfoBox.inc.php",$args)); 
+
+?>
 
 <br />
 

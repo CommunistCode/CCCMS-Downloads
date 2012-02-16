@@ -3,6 +3,7 @@
   if (isset($_GET['session']) && $_GET['session'] == "new") {
 
     unset($_SESSION['torrent']);
+    unset($_SESSION['originalFilename']);
 
   }
 
@@ -12,20 +13,22 @@
     
     $torrent = unserialize($_SESSION['torrent']);
 
-    $torrentInfo = $torrent->getInfoArray();
+    $name = $torrent->getName();
+    $developer = $torrent->getDeveloper();
+    $description = $torrent->getDescription();
+    $versionExternal = $torrent->getVersionExternal();
 
     echo("<br /><p>You are currently editing a torrent, click <a href='uploadItem.php?session=new'>Here</a> to start fresh</p>");
 
 
   } else {
 
-    $torrentInfo['name'] = "";
-    $torrentInfo['externalVersion'] = "";
-    $torrentInfo['developer'] = "";
-    $torrentInfo['description'] = "";
-    $torrentInfo['location'] = "";
-
-  }
+    $name = "";
+    $developer = "";
+    $description = "";
+    $versionExternal = "";
+    
+  } 
 
 ?>
 
@@ -37,7 +40,7 @@
 
     <tr>
       <th><label for='itemName'>Name:</label></th>
-      <td><input type='text' name='itemName' value='<?php echo($torrentInfo['name']); ?>' /></td>
+      <td><input type='text' name='itemName' value='<?=$name?>' /></td>
     </tr>
 
     <tr>
@@ -46,7 +49,7 @@
 
     <tr>
       <th><label for='itemVersion'>Version:</label></th>
-      <td><input type='text' name='itemVersion' value='<?php echo($torrentInfo['externalVersion']); ?>'/></td>
+      <td><input type='text' name='itemVersion' value='<?=$versionExternal?>'/></td>
     </tr>
 
     <tr>
@@ -55,7 +58,7 @@
 
     <tr>
       <th><label for='itemCreator'>Developer:</label></th>
-      <td><input type='text' name='itemDeveloper' value='<?php echo($torrentInfo['developer']); ?>'/></td>
+      <td><input type='text' name='itemDeveloper' value='<?=$developer?>'/></td>
     </tr>
 
     <tr>
@@ -64,7 +67,7 @@
 
     <tr>
       <th><label for='itemDesc'>Description:</label></th>
-      <td><textarea cols=60 rows=15 name='itemDesc'><?php echo($torrentInfo['description']); ?></textarea></td>
+      <td><textarea cols=60 rows=15 name='itemDesc'><?$description?></textarea></td>
     </tr>
 
     <tr>
@@ -85,9 +88,9 @@
       
       <?php
 
-        if ($torrentInfo['location'] != "") {
+        if (isset($_SESSION['originalFilename'])) {
 
-          echo("<td><strong>".$torrentInfo['originalFilename']."</strong></td>");
+          echo("<td><strong>".$_SESSION['originalFilename']."</strong></td>");
 
         } else {
 

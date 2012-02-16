@@ -37,7 +37,7 @@
       }
 
       echo(str_repeat("-",$branch['level'])." <a href='index.php?categoryID=".$branch['id']."'>".$branch['name']."</a>");
-/*      echo("(".$downloadTools->countPagesInCategoryRecurring($branch['id']).")"); */
+      echo(" (".$downloadTools->countItemsInCategoryRecurring($branch['id']).")"); 
 
       if ($currentCategory) {
 
@@ -73,7 +73,7 @@
     foreach ($childCategoryArray as $child) {
 
       echo("<li><a href='index.php?categoryID=".$child['downloadCategoryID']."'>".$child['name']."</a>");
-/*      echo("(".$downloadTools->countPagesInCategoryRecurring($child['downloadCategoryID']).")");*/
+      echo(" (".$downloadTools->countItemsInCategoryRecurring($child['downloadCategoryID']).")");
 
     }
 

@@ -24,10 +24,10 @@
       $tableDefinition[++$i]['name'] = "description";
       $tableDefinition[$i]['definition'] = "TEXT";
 
-      $tableDefinition[++$i]['name'] = "dateAdded";
+      $tableDefinition[++$i]['name'] = "dateUploaded";
       $tableDefinition[$i]['definition'] = "TEXT";
 
-      $tableDefinition[++$i]['name'] = "originalCreator";
+      $tableDefinition[++$i]['name'] = "developer";
       $tableDefinition[$i]['definition'] = "TEXT";
 
       $tableDefinition[++$i]['name'] = "uploaderID";
@@ -81,7 +81,7 @@
       $tableDefinition[++$i]['name'] = "downloadItemID";
       $tableDefinition[$i]['definition'] = "INT";
     
-      $tableDefinition[++$i]['name'] = "filname";
+      $tableDefinition[++$i]['name'] = "filename";
       $tableDefinition[$i]['definition'] = "TEXT";
 
       $tableDefinition[++$i]['name'] = "size";

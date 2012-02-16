@@ -23,11 +23,10 @@
 
     function __construct($torrentID=NULL) {
    
-      $this->pdoConn = new pdoConn();
- 
       if ($torrentID) {
 
-        $this->torrentPath = $GLOBALS['fullPath']."/download/files/torrents/";
+        $this->pdoConn = new pdoConn();
+        $this->torrentPath = "/berry/download/files/torrents/";
         $this->loadTorrentInfoFromID($torrentID);
 
       }
@@ -66,7 +65,22 @@
       $this->setVersionExternal($torrentInfo['versionExternal']);
       $this->setUploaderID($torrentInfo['uploaderID']);
       $this->setFilename($torrentInfo['filename']);
-      $this->setFullPath($this->torrentPath.$this->getFilename());
+      $this->setFullPath($GLOBALS['fullPath'].$this->torrentPath.$this->getFilename());
+      $this->setDownloadPath($this->torrentPath.$this->getFilename());
+      
+      $table = "download_itemCategoryLink";
+      $fields = array("downloadCategoryID");
+
+      $where[0]['column'] = "downloadItemID";
+      $where[0]['value'] = $id;
+
+      $result = $this->pdoConn->select($fields,$table,$where);
+
+      foreach($result as $row) {
+
+        $this->addCategory($row['downloadCategoryID']);
+
+      }
 
     }
 
@@ -83,6 +97,18 @@
     }
 
     /* BASIC GETTERS && SETTERS */
+
+    public function setDownloadPath($downloadPath) {
+    
+      $this->downloadPath = $downloadPath;
+  
+    }
+
+    public function getDownloadPath() {
+
+      return $this->downloadPath;
+
+    }
 
     public function setFullPath($fullPath) {
 
@@ -170,7 +196,7 @@
 
     public function setFilename($filename) {
 
-      $this->location = $filename;
+      $this->filename = $filename;
       
     }
 

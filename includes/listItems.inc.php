@@ -1,6 +1,7 @@
 <?php
 
   require_once($fullPath."/classes/pdoConn.class.php");
+  require_once($GLOBALS['fullPath']."/download/classes/torrent.class.php");
 
   $categoryID = 0;
 
@@ -29,8 +30,9 @@
     foreach ($result as $row) {
       
       $id = $row['downloadItemID'];
+      $torrent = new torrent($id);
 
-      $args = array("id"=>$id);
+      $args = array("torrent"=>$torrent);
          
       $torrentInfoBox = $pageTools->render("includes/torrentInfoBox.inc.php", $args);
       echo($torrentInfoBox."<br />"); 

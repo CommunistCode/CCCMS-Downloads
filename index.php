@@ -9,7 +9,16 @@
 
 	$pageTitle = "Downloads Home";
 	$heading = "Downloads";
-  $content = "Download Page";  
+  
+  if (isset($_GET['categoryID']) && $_GET['categoryID'] != 0) {
+    
+    $include = "includes/listItems.inc.php";  
+
+  } else {
+
+    $content = "Welcome to the downloads section.";
+
+  }
 
 	require_once($fullPath."/download/themes/".$pageTools->getTheme("download")."/templates/template.inc.php");
 
