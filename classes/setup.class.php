@@ -24,9 +24,6 @@
       $tableDefinition[++$i]['name'] = "description";
       $tableDefinition[$i]['definition'] = "TEXT";
 
-      $tableDefinition[++$i]['name'] = "dateUploaded";
-      $tableDefinition[$i]['definition'] = "TEXT";
-
       $tableDefinition[++$i]['name'] = "developer";
       $tableDefinition[$i]['definition'] = "TEXT";
 
