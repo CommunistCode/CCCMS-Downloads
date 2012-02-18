@@ -16,7 +16,8 @@
 
   } else {
 
-    $content = "Welcome to the downloads section.";
+    $content = $pageTools->getDynamicContent($pageTools->getPageIDbyDirectLink("download/index.php"));
+    $content = $pageTools->matchTags($content);
 
   }
 
