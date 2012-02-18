@@ -17,6 +17,8 @@
     $developer = $torrent->getDeveloper();
     $description = $torrent->getDescription();
     $versionExternal = $torrent->getVersionExternal();
+    $change = $torrent->getChangeLog();
+    $categories = $torrent->getCategoryArray();
 
     echo("<br /><p>You are currently editing a torrent, click <a href='uploadItem.php?session=new'>Here</a> to start fresh</p>");
 
@@ -27,6 +29,7 @@
     $developer = "";
     $description = "";
     $versionExternal = "";
+    $change = "";
     
   } 
 
@@ -39,7 +42,7 @@
   <table class='uploadItemTable'>
 
     <tr>
-      <th><label for='itemName'>Name:</label></th>
+      <th><label for='itemName'>Distro Name:</label></th>
       <td><input type='text' name='itemName' value='<?=$name?>' /></td>
     </tr>
 
@@ -67,7 +70,16 @@
 
     <tr>
       <th><label for='itemDesc'>Description:</label></th>
-      <td><textarea cols=60 rows=15 name='itemDesc'><?$description?></textarea></td>
+      <td><textarea cols=60 rows=15 name='itemDesc'><?=$description?></textarea></td>
+    </tr>
+
+    <tr>
+      <td class='spacer'></td>
+    </tr>
+
+    <tr>
+      <th><label for='itemChange'>Change Log:</label></th>
+      <td><textarea cols=60 rows=5 name='itemChange'><?=$change?></textarea></td>
     </tr>
 
     <tr>
@@ -76,7 +88,23 @@
 
     <tr>
       <th>Category:</th>
-      <td><select name='itemCat[]'><?php $downloadTools->renderCategorySelectOptions(); ?></select></td>
+      <td>
+      <?php 
+
+        if (!isset($categories)) {
+
+          echo("<select name='itemCat[]'>");
+          $downloadTools->renderCategorySelectOptions();
+          echo("</select>");
+
+        } else {
+  
+          echo($downloadTools->getTorrentCategoryNameArray($torrent));
+
+        }
+
+      ?>
+    </td>
     </tr>
 
     <tr>

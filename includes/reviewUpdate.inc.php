@@ -8,14 +8,16 @@
 
   $error = null;
 
-  if (!isset($_FILES['itemFile']['tmp_name']) && !isset($_SESSION['torrent'])) {
+  if (!isset($_FILES['itemFile']['tmp_name']) && !isset($_SESSION['updateTorrent'])) {
 
     echo("File could not be uploaded!");
+    unset($_SESSION['updateTorrent']);
+    unset($_SESSION['originalFilename']);
     return;
 
-  } else if (isset($_SESSION['torrent'])) {
+  } else if (isset($_SESSION['updateTorrent'])) {
 
-    $torrent = unserialize($_SESSION['torrent']);
+    $torrent = unserialize($_SESSION['updateTorrent']);
     $torrentDecoder = new torrentDecoder($torrent->getFullPath());
 
   } else {
@@ -54,8 +56,6 @@
   
       foreach ($torrentFiles as $filename) {
 
-        $filename = strtolower($filename);
-
         if (substr($filename,-8) == ".tar.bz2") {
 
           $image = 1;
@@ -70,7 +70,7 @@
 
         }
 
-        if ($filename == "readme" || $filename == "readme.txt") {
+        if ($filename == "README") {
 
           $readme = 1;
 
@@ -91,6 +91,7 @@
 
     }
 
+    $currentTorrent = new torrent($_POST['downloadItemID']);
     $torrent = new torrent();
     $downloadTools->storeTempTorrent($_FILES['itemFile'],$torrent);
 
@@ -98,24 +99,14 @@
 
   $member = unserialize($_SESSION['member']);
 
-  $torrent->setName($_POST['itemName']);
-  $torrent->setDescription($_POST['itemDesc']);
+  $torrent->setID($_POST['downloadItemID']);
   $torrent->setDateUploaded(time());
+  $torrent->setName($currentTorrent->getName());
   $torrent->setDeveloper($_POST['itemDeveloper']);
   $torrent->setVersionExternal($_POST['itemVersion']);
   $torrent->setUploaderID($member->getID());
   $torrent->setChangeLog($_POST['itemChange']);
 
-  if (isset($_POST['itemCat'])) {
-
-    foreach($_POST['itemCat'] as $itemCategory) {
-
-      $torrent->addCategory($itemCategory);
-
-    }
-
-  }
- 
   if (!isset($torrentFiles)) {
  
     $torrentFiles = $torrentDecoder->getFiles();
@@ -131,7 +122,7 @@
 
   $args = array("torrent"=>$torrent);
 
-  echo($pageTools->render("includes/torrentInfoBox.inc.php",$args)); 
+  echo($pageTools->render("includes/torrentUpdateInfoBox.inc.php",$args)); 
 
 ?>
 
@@ -157,13 +148,14 @@
 <?php
 
   $serialisedTorrent = serialize($torrent);
-  $_SESSION['torrent'] = $serialisedTorrent;
+  $_SESSION['updateTorrent'] = $serialisedTorrent;
 
 ?>
 
 <br />
 
-<form action='uploadItem.php' method='post'>
+<form action='updateVersion.php' method='post'>
+  <input type='hidden' value='<?php echo($_GET['downloadItemID']); ?>' name='downloadItemID' />
   <input type='submit' value='Upload!' name='doUpload' />
   <input type='submit' value='Edit' name='edit' />
 </form>

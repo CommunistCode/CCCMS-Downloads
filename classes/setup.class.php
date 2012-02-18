@@ -96,6 +96,9 @@
       $tableDefinition[++$i]['name'] = "dateUploaded";
       $tableDefinition[$i]['definition'] = "INT";
 
+      $tableDefinition[++$i]['name'] = "changeLog";
+      $tableDefinition[$i]['definition'] = "TEXT";
+
       $primaryKey = "fileID";
  
       $dbTools->newTable($tableName,$tableDefinition,$primaryKey);

@@ -10,6 +10,7 @@
     protected $id;
     protected $name;
     protected $description;
+    protected $changeLog;
     protected $dateUploaded;
     protected $developer;
     protected $versionExternal;
@@ -46,22 +47,27 @@
         developer, 
         uploaderID, 
         versionExternal,
-        filename
+        filename,
+        changeLog
 
       FROM download_items dI 
         NATURAL JOIN download_itemCategoryLink dCL 
           NATURAL JOIN download_fileInfo dFI
 
-      WHERE dI.downloadItemID = ?";
+      WHERE dI.downloadItemID = ?
+      ORDER BY versionInternal DESC
+      LIMIT 1";
 
       $result = $this->pdoConn->customQuery($queryString,$bindArray);
       
       $torrentInfo = $result[0];
 
+      $this->id = $id;
       $this->setName($torrentInfo['name']);
       $this->setDescription($torrentInfo['description']);
       $this->setDateUploaded($torrentInfo['dateUploaded']);
       $this->setDeveloper($torrentInfo['developer']);
+      $this->setChangeLog($torrentInfo['changeLog']);
       $this->setVersionExternal($torrentInfo['versionExternal']);
       $this->setUploaderID($torrentInfo['uploaderID']);
       $this->setFilename($torrentInfo['filename']);
@@ -90,6 +96,14 @@
 
     }
 
+    public function removeCategory($categoryID) {
+
+      $arrayID = array_search($categoryID,$this->categories);
+
+      unset($this->categories[$arrayID]);
+
+    }
+
     public function getCategoryArray() {
 
       return $this->categories;
@@ -97,6 +111,30 @@
     }
 
     /* BASIC GETTERS && SETTERS */
+ 
+    public function setChangeLog($changeLog) {
+
+      $this->changeLog = $changeLog;
+    
+    }
+
+    public function getChangeLog() {
+
+      return $this->changeLog;
+
+    }
+
+    public function setID($id) {
+
+      $this->id = $id;
+
+    }
+ 
+    public function getID() {
+
+      return $this->id;
+
+    }
 
     public function setDownloadPath($downloadPath) {
     

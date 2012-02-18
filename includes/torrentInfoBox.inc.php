@@ -4,22 +4,35 @@
 
   if (!isset($arg_torrent)) {
 
-    echo("Torrent object was not recieved!");
+    echo("Required variables were not passed to include!");
     return; 
 
   }
-  
+
   require_once($GLOBALS['fullPath']."/membership/classes/memberTools.class.php"); 
 
   $memberTools = new memberTools();
-  
-  $categoryList = implode(",",$arg_torrent->getCategoryArray()); 
+  $downloadTools = new downloadTools();
+
+  $categoryList = array();
+  $categoryArray = $arg_torrent->getCategoryArray();  
+
+  foreach ($categoryArray as $categoryID) {
+   
+    $categoryLink = "<a href='index.php?categoryID=".$categoryID."'>".$downloadTools->getCategoryName($categoryID)."</a>";
+ 
+    array_push($categoryList,$categoryLink);
+
+  } 
+
+  $categoryList = implode(",", $categoryList); 
 
 ?>
 
 <div class='torrentInfoBox'>
   <div class='nameVersion'>
-    <div class='name'><strong>Image Name: </strong> <a href='<?php echo($arg_torrent->getDownloadPath()); ?>'><?php echo($arg_torrent->getName()); ?></a></div>
+    <div class='name'><strong>Image Name: </strong> <a href='viewDetails.php?id=<?php echo($arg_torrent->getID()); ?>&categoryID=<?php echo($arg_categoryID); ?>'><?php echo($arg_torrent->getName()); ?></a></div>
+    <div class='download'><strong>Download: </strong> <a href='<?php echo($arg_torrent->getDownloadPath()); ?>'><?php echo($arg_torrent->getFilename()); ?></a></div>
     <div class='version'><strong>Version: </strong><?php echo($arg_torrent->getVersionExternal()); ?></div>
     <div class='clear'></div>
   </div>
@@ -31,13 +44,13 @@
   </div>
 
   <div class='dateDevel'>
-    <div class='dateUploaded'><strong>Date Uploaded: </strong><?php echo(date("j/n/y - G:i",$arg_torrent->getdateUploaded())); ?></div>
+    <div class='dateUploaded'><strong>Date Uploaded: </strong><?php echo(date("j/n/y",$arg_torrent->getdateUploaded())); ?></div>
     <div class='developer'><strong>Developer: </strong><?php echo($arg_torrent->getDeveloper()); ?></div>
-    <div class='developer'><strong>Uploader: </strong><?php echo($memberTools->getUsername($arg_torrent->getUploaderID())); ?></div>
+    <div class='uploader'><strong>Uploader: </strong><?php echo($memberTools->getUsername($arg_torrent->getUploaderID())); ?></div>
     <div class='clear'></div>
   </div>
   
   <div class='categories'>
-    <div><strong>Categories: <?php echo($categoryList); ?></strong></div>
+    <div><strong>Categories: </strong><?php echo($categoryList); ?></div>
   </div>
 </div>

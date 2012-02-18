@@ -21,6 +21,24 @@
 
     }
 
+    public function getTorrentCategoryNameArray($torrentObj) {
+
+      $categoryList = array();
+      $categoryArray = $torrentObj->getCategoryArray();
+
+      foreach ($categoryArray as $categoryID) {
+
+        $categoryLink = "<a href='index.php?categoryID=".$categoryID."'>".$this->getCategoryName($categoryID)."</a>";
+
+        array_push($categoryList,$categoryLink);
+
+      }
+
+      return implode(",", $categoryList);
+
+    }
+
+
     public function storeTempTorrent($fileArray, $torrentObject) {
 
       $ret['error'] = 0;
@@ -104,8 +122,58 @@
    
       $insert[3]['field'] = "filename";
       $insert[3]['value'] = $torrent->getName()."-".$torrent->getVersionExternal().".torrent";
-    
+ 
+      $insert[4]['field'] = "changeLog";
+      $insert[4]['value'] = $torrent->getChangeLog();   
+   
       $this->pdoConn->insert($table,$insert);
+
+    }
+
+    public function addNewTorrentVersion($torrentObject) {
+
+      $torrent = $torrentObject;
+
+      copy($torrent->getFullPath(),$GLOBALS['fullPath']."/download/files/torrents/".$torrent->getName()."-".$torrent->getVersionExternal().".torrent");
+
+      $table = "download_fileInfo";
+
+      $insert[0]['field'] = "downloadItemID";
+      $insert[0]['value'] = $torrent->getID();
+
+      $insert[1]['field'] = "dateUploaded";
+      $insert[1]['value'] = time();
+
+      $insert[2]['field'] = "versionExternal";
+      $insert[2]['value'] = $torrent->getVersionExternal();
+
+      $insert[3]['field'] = "filename";
+      $insert[3]['value'] = $torrent->getName()."-".$torrent->getVersionExternal().".torrent";
+
+      $insert[4]['field'] = "changeLog";
+      $insert[4]['value'] = $torrent->getChangeLog();
+
+      $insert[5]['field'] = "versionInternal";
+      $insert[5]['value'] = $this->getLatestInternalVersion($torrent->getID())+1;
+
+      $this->pdoConn->insert($table,$insert);
+
+    }
+
+    public function getLatestInternalVersion($downloadItemID) {
+
+      $field = array("versionInternal");
+      $table = "download_fileInfo";
+
+      $where[0]['column'] = "downloadItemID";
+      $where[0]['value'] = $downloadItemID;
+
+      $orderBy = "versionInternal DESC";
+      $limit = 1;
+
+      $return = $this->pdoConn->select($field,$table,$where,$orderBy,$limit);
+
+      return $return[0]['versionInternal'];
 
     }
 
@@ -170,7 +238,35 @@
 
       }
 
-    }    
+    }
+
+    public function getCategoryName($catId) {
+
+      $fields = array("name");
+      $table = "download_categories";
+      
+      $where[0]['column'] = "downloadCategoryID";
+      $where[0]['value'] = $catId;
+      
+      $result = $this->pdoConn->select($fields,$table,$where);
+
+      return $result[0]['name'];
+
+    } 
+
+    public function getVersionsArray($itemID) {
+
+      $fields = array("versionInternal","versionExternal");
+      $table = "download_fileInfo";
+        
+      $where[0]['column'] = "downloadItemID";
+      $where[0]['value'] = $itemID;
+
+      $result = $this->pdoConn->select($fields,$table,$where);
+
+      return $result;
+
+    }   
 
   }
 

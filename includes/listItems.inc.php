@@ -7,7 +7,7 @@
 
   if (isset($_GET['categoryID'])) {
 
-    $categoryID = $_GET['categoryID'];  
+    $categoryID = $_GET['categoryID'];
 
   }
 
@@ -31,8 +31,7 @@
       
       $id = $row['downloadItemID'];
       $torrent = new torrent($id);
-
-      $args = array("torrent"=>$torrent);
+      $args = array("torrent"=>$torrent, "categoryID"=>$categoryID);
          
       $torrentInfoBox = $pageTools->render("includes/torrentInfoBox.inc.php", $args);
       echo($torrentInfoBox."<br />"); 
