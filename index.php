@@ -17,7 +17,7 @@
   } else {
 
     $content = $pageTools->getDynamicContent($pageTools->getPageIDbyDirectLink("download/index.php"));
-    $content = $pageTools->matchTags($content);
+    $content = $pageTools->matchTags($content['text']);
 
   }
 
