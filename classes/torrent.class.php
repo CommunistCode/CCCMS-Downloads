@@ -27,7 +27,7 @@
       if ($torrentID) {
 
         $this->pdoConn = new pdoConn();
-        $this->torrentPath = "/berry/download/files/torrents/";
+        $this->torrentPath = "/download/files/torrents/";
         $this->loadTorrentInfoFromID($torrentID);
 
       }
