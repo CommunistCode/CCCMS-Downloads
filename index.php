@@ -1,26 +1,23 @@
 <?php
 
-	require_once("../config/config.php");
-	require_once($fullPath."/classes/pageTools.class.php");
-	require_once($fullPath."/download/classes/downloadTools.class.php");
-	require_once($fullPath."/includes/global.inc.php");
+	require_once("includes/downloadGlobal.inc.php");
 
-	$downloadTools = new downloadTools();
+  $page->set("title","Downloads");
+  $page->set("heading","Downloads");
 
-	$pageTitle = "Downloads Home";
-	$heading = "Downloads";
-  
   if (isset($_GET['categoryID']) && $_GET['categoryID'] != 0) {
     
-    $include = "includes/listItems.inc.php";  
+    $page->addInclude("includes/listItems.inc.php");
 
   } else {
 
     $content = $pageTools->getDynamicContent($pageTools->getPageIDbyDirectLink("download/index.php"));
     $content = $pageTools->matchTags($content['text']);
+    
+    $page->addContent($content);
 
   }
 
-	require_once($fullPath."/download/themes/".$pageTools->getTheme("download")."/templates/template.inc.php");
+  $page->render("corePage.inc.php");
 
 ?>

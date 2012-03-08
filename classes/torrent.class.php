@@ -1,7 +1,5 @@
 <?php
 
-  require_once($GLOBALS['fullPath']."/classes/pdoConn.class.php");
-
   class torrent {
 
     private $torrentPath; 

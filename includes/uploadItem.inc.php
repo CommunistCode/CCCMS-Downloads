@@ -1,5 +1,7 @@
 <?php
 
+  $downloadTools = new downloadTools();
+
   if (isset($_GET['session']) && $_GET['session'] == "new") {
 
     unset($_SESSION['torrent']);

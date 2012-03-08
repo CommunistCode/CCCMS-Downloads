@@ -1,7 +1,6 @@
 <?php
 
-  require_once($fullPath."/download/classes/downloadTools.class.php");
-  require_once($fullPath."/download/classes/torrent.class.php");
+  require_once("classes/torrent.class.php");
 
   $downloadTools = new downloadTools();
 

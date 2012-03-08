@@ -1,5 +1,7 @@
 <?php
 
+  $downloadTools = new downloadTools();
+
   if (isset($_GET['categoryID'])) {
 
     $categoryID = $_GET['categoryID'];

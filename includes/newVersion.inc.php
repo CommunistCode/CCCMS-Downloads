@@ -1,6 +1,6 @@
 <?php
 
-  require_once($fullPath."/download/classes/torrent.class.php");
+  require_once(FULL_PATH."/download/classes/torrent.class.php");
   
   if (isset($_SESSION['updateTorrent'])) {
 
