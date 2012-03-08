@@ -1,6 +1,7 @@
 <?php
 
-  require_once(FULL_PATH."/global/helperClasses/torrentDecoder/torrentDecoder.class.php");
+  require_once(FULL_PATH."/helperClasses/torrentDecoder/torrentDecoder.class.php");
+  require_once(FULL_PATH."/".MEMBER_MODULE_DIR."/classes/member.class.php");
   require_once("classes/torrent.class.php");
 
   $downloadTools = new downloadTools();
@@ -131,7 +132,7 @@
 
   $args = array("torrent"=>$torrent);
 
-  echo($pageTools->render("includes/torrentInfoBox.inc.php",$args)); 
+  echo($pageTools->render("includes/torrentInfoBox.inc.php",$args,"arg")); 
 
 ?>
 
