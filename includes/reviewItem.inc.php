@@ -1,10 +1,10 @@
 <?php
 
-  require_once($fullPath."/helperClasses/torrentDecoder/torrentDecoder.class.php");
-  require_once($fullPath."/download/classes/downloadTools.class.php");
-  require_once($fullPath."/download/classes/torrent.class.php");
+  require_once(FULL_PATH."/global/helperClasses/torrentDecoder/torrentDecoder.class.php");
+  require_once("classes/torrent.class.php");
 
   $downloadTools = new downloadTools();
+  $pageTools = new pageTools();
 
   $error = null;
 

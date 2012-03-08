@@ -1,6 +1,5 @@
 <?php
 
-  require_once($fullPath."/classes/pdoConn.class.php");
   require_once($fullPath."/helperClasses/categoryManager/categoryManager.class.php");
 
   class downloadTools {

@@ -1,16 +1,11 @@
 <?php
 
-	require_once("../config/config.php");
-	require_once($fullPath."/classes/pageTools.class.php");
-	require_once($fullPath."/download/classes/downloadTools.class.php");
-	require_once($fullPath."/includes/global.inc.php");
-  require_once($fullPath."/membership/includes/checkLogin.inc.php");
+	require_once("includes/downloadGlobal.inc.php");
+  require_once(FULL_PATH."/membership/includes/checkLogin.inc.php");
 
-	$downloadTools = new downloadTools();
-
-	$pageTitle = "Upload New Torrent";
-	$heading = "Upload New Torrent";
-
+  $page->set("title","Upload New Torrent");
+  $page->set("heading","Upload New Torrent");
+  
   if (isset($_POST['uploadFile'])) {
 
     $include = "includes/reviewItem.inc.php";
@@ -25,6 +20,7 @@
 
   }
 
-	require_once($fullPath."/download/themes/".$pageTools->getTheme("download")."/templates/template.inc.php");
+  $page->addInclude($include);
+  $page->render("corePage.inc.php");
 
 ?>

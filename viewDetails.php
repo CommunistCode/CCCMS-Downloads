@@ -1,25 +1,20 @@
 <?php
 
-	require_once("../config/config.php");
-	require_once($fullPath."/classes/pageTools.class.php");
-	require_once($fullPath."/download/classes/downloadTools.class.php");
-	require_once($fullPath."/includes/global.inc.php");
+	require_once("includes/downloadGlobal.inc.php");
 
-	$downloadTools = new downloadTools();
-
-	$pageTitle = "Downloads Home";
-	$heading = "Downloads";
-  
+  $page->set("title","View Download");
+  $page->set("heading","View Download");
+	
   if (isset($_GET['id'])) {
     
-    $include = "includes/detailedItemView.inc.php";  
+    $page->addInclude("includes/detailedItemView.inc.php");
 
   } else {
 
-    $content = "Torrent could not be found!";
+    $page->addContent("Torrent could not be found!");
 
   }
 
-	require_once($fullPath."/download/themes/".$pageTools->getTheme("download")."/templates/template.inc.php");
+  $page->render("corePage.inc.php");
 
 ?>

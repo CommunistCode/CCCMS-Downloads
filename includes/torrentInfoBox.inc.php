@@ -9,7 +9,7 @@
 
   }
 
-  require_once($GLOBALS['fullPath']."/membership/classes/memberTools.class.php"); 
+  require_once(FULL_PATH."/".MEMBER_MODULE_DIR."/classes/memberTools.class.php"); 
 
   $memberTools = new memberTools();
   $downloadTools = new downloadTools();

@@ -1,13 +1,13 @@
-<link href="<?php echo($directoryPath); ?>/download/themes/<?php echo($pageTools->getTheme("download")); ?>/stylesheets/detailedTorrentInfo.css" rel="stylesheet" />    
+<link href="<?php echo(DIRECTORY_PATH); ?>/download/themes/<?php echo(THEME); ?>/stylesheets/detailedTorrentInfo.css" rel="stylesheet" />    
 
 <?php
 
   require_once("classes/torrent.class.php");
-  require_once($GLOBALS['fullPath']."/membership/classes/memberTools.class.php");
-  require_once($GLOBALS['fullPath']."/download/classes/downloadTools.class.php");
+  require_once(FULL_PATH."/membership/classes/memberTools.class.php");
 
   $torrent = new torrent($_GET['id']);
   $memberTools = new memberTools();
+  $pageTools = new pageTools();
   $downloadTools = new downloadTools();
 
 ?>
