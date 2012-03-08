@@ -1,111 +1,98 @@
-<?php
-
-// License Information /////////////////////////////////////////////////////////////////////////////
-
+<?
 /*
- * PeerTracker - OpenSource BitTorrent Tracker
- * Revision - $Id: announce.php 161 2010-01-20 17:49:50Z trigunflame $
- * Copyright (C) 2009 PeerTracker Team
- *
- * PeerTracker is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * PeerTracker is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with PeerTracker.  If not, see <http://www.gnu.org/licenses/>.
+ * OpenTracker
+ * revised 16-Feb-2005
+ * revised 23-Apr-2009: remove RTRIM for BINARY column comparisons
  */
 
-// Enviroment Runtime //////////////////////////////////////////////////////////////////////////////
+require_once 'bencoding.inc.php';
+require_once 'config.inc.php';
 
-// error level
-error_reporting(E_ERROR | E_PARSE);
-//error_reporting(E_ALL & ~E_WARNING);
-//error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
-
-// ignore disconnects
-ignore_user_abort(true);
-
-// load tracker core
-require './tracker.mysql.php';
-
-// Verify Request //////////////////////////////////////////////////////////////////////////////////
-
-// strip auto-escaped data
-if (get_magic_quotes_gpc())
-{
-	$_GET['info_hash'] = stripslashes($_GET['info_hash']);
-	$_GET['peer_id'] = stripslashes($_GET['peer_id']);
+function errorexit($reason) {
+	exit(bencode(array('failure reason' => $reason)));
 }
 
-// 20-bytes - info_hash
-// sha-1 hash of torrent metainfo
-if (!isset($_GET['info_hash']) || strlen($_GET['info_hash']) != 20) exit;
-
-// 20-bytes - peer_id
-// client generated unique peer identifier
-if (!isset($_GET['peer_id']) || strlen($_GET['peer_id']) != 20) exit;
-
-// integer - port
-// port the client is accepting connections from
-if (!(isset($_GET['port']) && is_numeric($_GET['port']))) tracker_error('client listening port is invalid');
-
-// integer - left
-// number of bytes left for the peer to download
-if (isset($_GET['left']) && is_numeric($_GET['left'])) $_SERVER['tracker']['seeding'] = ($_GET['left'] > 0 ? 0 : 1); else tracker_error('client data left field is invalid');
-
-// integer boolean - compact - optional
-// send a compact peer response
-// http://bittorrent.org/beps/bep_0023.html
-if (!isset($_GET['compact']) || $_SERVER['tracker']['force_compact']) $_GET['compact'] = 1; else $_GET['compact'] += 0;
-
-// integer boolean - no_peer_id - optional
-// omit peer_id in dictionary announce response
-if (!isset($_GET['no_peer_id'])) $_GET['no_peer_id'] = 0; else $_GET['no_peer_id'] += 0;
-
-// string - ip - optional
-// ip address the peer requested to use
-if (isset($_GET['ip']) && $_SERVER['tracker']['external_ip'])
-{
-	// dotted decimal only
-	$_GET['ip'] = trim($_GET['ip'],'::ffff:');
-	if (!ip2long($_GET['ip'])) tracker_error('invalid ip, dotted decimal only');
+function resolve_ip($host) {
+	$ip = ip2long($host);
+	if (($ip === false) || ($ip == -1)) {
+		$ip = ip2long(gethostbyname($host));
+		if (($ip === false) || ($ip == -1)) {
+			return false;
+		}
+	}
+	return $ip;
 }
-// set ip to connected client
-elseif (isset($_SERVER['REMOTE_ADDR'])) $_GET['ip'] = trim($_SERVER['REMOTE_ADDR'],'::ffff:');
-// cannot locate suitable ip, must abort
-else tracker_error('could not locate clients ip');
 
-// integer - numwant - optional
-// number of peers that the client has requested
-if (!isset($_GET['numwant'])) $_GET['numwant'] = $_SERVER['tracker']['default_peers'];
-elseif (($_GET['numwant']+0) > $_SERVER['tracker']['max_peers']) $_GET['numwant'] = $_SERVER['tracker']['max_peers'];
-else $_GET['numwant'] += 0;
+header('Content-Type: text/plain');
 
-// Handle Request //////////////////////////////////////////////////////////////////////////////////
+// validate request
+if (empty($_GET['info_hash']) || empty($_GET['port']) || !is_numeric($_GET['port']) || empty($_GET['peer_id']) || !isset($_GET['uploaded']) || !is_numeric($_GET['uploaded']) || !isset($_GET['downloaded']) || !is_numeric($_GET['downloaded']) || !isset($_GET['left']) || !is_numeric($_GET['left']) || (!empty($_GET['event']) && ($_GET['event'] != 'started') && ($_GET['event'] != 'completed') && ($_GET['event'] != 'stopped'))) {
+	errorexit('invalid request (see http://bitconjurer.org/BitTorrent/protocol.html)');
+}
 
-// open database
-peertracker::open();
+// is the announce method allowed?
+if ($require_announce_protocol == 'no_peer_id') {
+	if (empty($_GET['compact']) && empty($_GET['no_peer_id'])) {
+		errorexit('standard announces not allowed; use no_peer_id or compact option');
+	}
+}
+else if ($require_announce_protocol == 'compact') {
+	if (empty($_GET['compact'])) {
+		errorexit('tracker requires use of compact option');
+	}
+}
 
-// make info_hash & peer_id SQL friendly
-$_GET['info_hash'] = peertracker::$api->escape_sql($_GET['info_hash']);
-$_GET['peer_id']   = peertracker::$api->escape_sql($_GET['peer_id']);
+// convert dotted decimal or host name to integer IP
+$ip = resolve_ip(empty($_GET['ip']) ? $_SERVER['REMOTE_ADDR'] : $_GET['ip']);
+if ($ip === false) {
+	errorexit("unable to resolve host name $_GET[ip]");
+}
 
-// announce peers
-peertracker::peers();
+// connect to database
+@mysql_pconnect($db_server, $db_user, $db_pass) or errorexit('database unavailable');
+@mysql_select_db($db_db) or errorexit('database unavailable');
 
-// track client
-peertracker::event();
+// calculate announce interval
+$query = @mysql_query("SELECT COUNT(*) FROM `$db_table` WHERE `expire_time` > NOW();") or errorexit('database error');
+$num_peers = mysql_result($query, 0);
+$query = @mysql_query("SELECT COUNT(*) FROM `$db_table` WHERE `update_time` > NOW() - INTERVAL 1 MINUTE;") or errorexit('database error');
+$announce_rate = mysql_result($query, 0);
+$announce_interval = max($num_peers * $announce_rate / ($max_announce_rate * $max_announce_rate) * 60, $min_announce_interval);
 
-// garbage collection
-peertracker::clean();
+// calculate expiration time offset
+if (!empty($_GET['event']) && ($_GET['event'] == 'stopped')) {
+	$expire_time = 0;
+}
+else {
+	$expire_time = $announce_interval * $expire_factor;
+}
 
-// close database
-peertracker::close();
+// insert/update peer in database
+$columns = '`info_hash`, `ip`, `port`, `peer_id`, `uploaded`, `downloaded`, `left`, `expire_time`';
+$values = '\'' . mysql_escape_string($_GET['info_hash'])  . '\', ' . $ip . ', ' . $_GET['port'] . ', \'' . mysql_escape_string($_GET['peer_id']). '\', ' . $_GET['uploaded'] . ', ' . $_GET['downloaded'] . ', ' . $_GET['left'] . ", NOW() + INTERVAL $expire_time SECOND";
+@mysql_query("REPLACE INTO `$db_table` ($columns) VALUES ($values);") or errorexit('database error');
 
+// retrieve peers from database
+$peers = array();
+$numwant = empty($_GET['numwant']) ? 50 : intval($_GET['numwant']);
+$query = @mysql_query("SELECT `ip`, `port`, `peer_id` FROM `$db_table` WHERE `info_hash` = '" . mysql_escape_string($_GET['info_hash']) . "' AND `expire_time` > NOW() ORDER BY RAND() LIMIT $numwant;") or errorexit('database error');
+if (!empty($_REQUEST['compact'])) {
+	$peers = '';
+	while ($array = mysql_fetch_assoc($query)) {
+		$peers .= pack('Nn', $array['ip'], $array['port']);
+	}
+}
+else if (!empty($_REQUEST['no_peer_id'])) {
+	while ($array = mysql_fetch_assoc($query)) {
+		$peers[] = array('ip' => long2ip($array['ip']), 'port' => intval($array['port']));
+	}
+}
+else {
+	while ($array = mysql_fetch_assoc($query)) {
+		$peers[] = array('ip' => long2ip($array['ip']), 'port' => intval($array['port']), 'peer id' => $array['peer_id']);
+	}
+}
+
+// return data to client
+exit(bencode(array('interval' => intval($announce_interval), 'peers' => $peers)));
 ?>

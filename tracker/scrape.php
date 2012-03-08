@@ -1,79 +1,56 @@
-<?php
-
-// License Information /////////////////////////////////////////////////////////////////////////////
-
+<?
 /*
- * PeerTracker - OpenSource BitTorrent Tracker
- * Revision - $Id: scrape.php 161 2010-01-20 17:49:50Z trigunflame $
- * Copyright (C) 2009 PeerTracker Team
- *
- * PeerTracker is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * PeerTracker is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with PeerTracker.  If not, see <http://www.gnu.org/licenses/>.
+ * OpenTracker
+ * revised 16-Feb-2005
+ * revised 23-Apr-2009: removed RTRIM on BINARY column comparisons
  */
 
-// Enviroment Runtime //////////////////////////////////////////////////////////////////////////////
+require_once 'bencoding.inc.php';
+require_once 'config.inc.php';
 
-// error level
-error_reporting(E_ERROR | E_PARSE);
-//error_reporting(E_ALL & ~E_WARNING);
-//error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
-
-// ignore disconnects
-ignore_user_abort(true);
-
-// load tracker core
-require './tracker.mysql.php';
-
-// Verify Request //////////////////////////////////////////////////////////////////////////////////
-
-// tracker statistics
-if (isset($_GET['stats']))
-{
-	// open database
-	peertracker::open();
-
-	// display stats
-	peertracker::stats();
-
-	// close database
-	peertracker::close();
-
-	// exit immediately
-	exit;
+function errorexit($reason) {
+	exit(bencode(array('failure reason' => $reason)));
 }
 
-// strip auto-escaped data
-if (get_magic_quotes_gpc()) $_GET['info_hash'] = stripslashes($_GET['info_hash']);
+header('Content-Type: text/plain');
 
-// 20-bytes - info_hash
-// sha-1 hash of torrent being tracked
-if (!isset($_GET['info_hash']) || strlen($_GET['info_hash']) != 20)
-{
-	// full scrape disabled
-	if (!$_SERVER['tracker']['full_scrape']) exit;
-	// full scrape enabled
-	else unset($_GET['info_hash']);
+// connect to database
+@mysql_pconnect($db_server, $db_user, $db_pass) or errorexit('database unavailable');
+@mysql_select_db($db_db) or errorexit('database unavailable');
+
+// calculate scrape interval
+$query = @mysql_query("SELECT COUNT(*) FROM `$db_table` WHERE `expire_time` > NOW();") or errorexit('database error');
+$num_peers = mysql_result($query, 0);
+$query = @mysql_query("SELECT COUNT(*) FROM `$db_table` WHERE `update_time` > NOW() - INTERVAL 1 MINUTE;") or errorexit('database error');
+$announce_rate = mysql_result($query, 0);
+$scrape_interval = max($num_peers * $announce_rate / ($max_announce_rate * $max_announce_rate) * 60, $min_announce_interval) * $scrape_factor;
+
+// determine which info hashes to scrape
+if (empty($_GET['info_hash'])) {
+	$hashes = array();
+	$query = @mysql_query("SELECT DISTINCT `info_hash` FROM `$db_table` WHERE `expire_time` > NOW()") or errorexit('database error');
+	while ($row = mysql_fetch_row($query)) {
+		$hashes[] = $row[0];
+	}
+}
+else {
+	parse_str(str_replace('info_hash=', 'info_hash[]=', $_SERVER['QUERY_STRING']), $array);
+	$hashes = $array['info_hash'];
 }
 
-// Handle Request //////////////////////////////////////////////////////////////////////////////////
+// retrieve statistics for each desired info hash
+$files = array();
+foreach ($hashes as $hash) {
+	$hash_escaped = mysql_escape_string($hash);
+	$query = @mysql_query("SELECT COUNT(*) FROM `$db_table` WHERE `info_hash` = '$hash_escaped' AND `left` = 0 AND `expire_time` > NOW()") or errorexit('database error');
+	$complete = intval(mysql_result($query, 0));
+	$query = @mysql_query("SELECT COUNT(*) FROM `$db_table` WHERE `info_hash` = '$hash_escaped' AND `left` > 0 AND `expire_time` > NOW()") or errorexit('database error');
+	$incomplete = intval(mysql_result($query, 0));
+	$query = @mysql_query("SELECT COUNT(DISTINCT ip, port) FROM `$db_table` WHERE `info_hash` = '$hash_escaped' AND `left` = 0") or errorexit('database error');
+	$downloaded = intval(mysql_result($query, 0));
+	$files[$hash] = array('complete' => $complete, 'incomplete' => $incomplete, 'downloaded' => $downloaded);
+}
 
-// open database
-peertracker::open();
-
-// perform scrape
-peertracker::scrape();
-
-// close database
-peertracker::close();
-
+// return data to client
+exit(bencode(array('files' => $files, 'flags' => array('min_request_interval' => intval($scrape_interval)))));
 ?>
