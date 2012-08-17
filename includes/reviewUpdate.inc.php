@@ -1,10 +1,11 @@
 <?php
 
-  require_once($fullPath."/helperClasses/torrentDecoder/torrentDecoder.class.php");
-  require_once($fullPath."/download/classes/downloadTools.class.php");
-  require_once($fullPath."/download/classes/torrent.class.php");
+  require_once(FULL_PATH."/helperClasses/torrentDecoder/torrentDecoder.class.php");
+  require_once(FULL_PATH."/".MEMBER_MODULE_DIR."/classes/member.class.php");
+  require_once(FULL_PATH."/download/classes/torrent.class.php");
 
   $downloadTools = new downloadTools();
+  $pageTools = new pageTools();
 
   $error = null;
 
@@ -70,7 +71,7 @@
 
         }
 
-        if ($filename == "README") {
+        if ($filename == "README" || $filename == "README.txt") {
 
           $readme = 1;
 

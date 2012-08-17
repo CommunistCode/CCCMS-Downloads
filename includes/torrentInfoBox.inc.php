@@ -27,6 +27,16 @@
 
   $categoryList = implode(",", $categoryList); 
 
+$description = nl2br($arg_torrent->getDescription());
+
+if (strlen($description) > 200)
+{
+
+  $description = substr($description, 0, 200);
+  $description = $description."<a href='viewDetails.php?id=".$arg_torrent->getID()."'>&hellip;</a>";
+
+}
+
 ?>
 
 <div class='torrentInfoBox'>
@@ -39,7 +49,7 @@
 
   <div class='description'>
     <div class='descriptionTitle'><strong>Description</strong></div>
-    <div class='descriptionText'><?php echo(nl2br($arg_torrent->getDescription())); ?></div>
+    <div class='descriptionText'><?php echo($description); ?></div>
     <div class='clear'></div>
   </div>
 

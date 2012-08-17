@@ -47,14 +47,14 @@
     </tr>
 
     <tr>
-      <th>Description</th>
-      <td><?php echo($pageTools->matchTags($torrent->getDescription())); ?></td>
+      
+<th>Change Log</th>
+      <td><?php echo($pageTools->matchTags($torrent->getChangeLog())); ?><a class='extraDetail' href=''>View All Change Logs</a></td>
     </tr>
 
     <tr class='lastRow'>
-      <th>Change Log</th>
-      <td><?php echo($pageTools->matchTags($torrent->getChangeLog())); ?><a class='extraDetail' href=''>View All Change Logs</a></td>
-    </tr>
+      <th>Description</th>
+      <td><?php echo($pageTools->matchTags($torrent->getDescription())); ?></td>    </tr>
 
   </table>
 
