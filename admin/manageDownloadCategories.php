@@ -1,18 +1,11 @@
 <?php 
 
-	require_once("../../config/config.php");
-	require_once($fullPath."/admin/includes/global.inc.php");
-	require_once($fullPath."/admin/includes/checkLogin.inc.php");
-	require_once("classes/downloadAdminTools.class.php");
-	require_once($fullPath."/download/classes/downloadTools.class.php");
+  require_once("includes/downloadAdminGlobal.inc.php");
 
-	$downloadAdminTools = new downloadAdminTools();
-	$downloadTools = new downloadTools();
-  $pageTools = new pageTools();
+  $page->set("title","Manage Categories");
+  $page->set("heading","Manage Categories");
 
-  $title = "Admin : Downloads : Manage Categories";
-  $heading = "Manage Categories";
-  $include = "includes/manageCategories.inc.php";
+  $page->addInclude("includes/manageCategories.inc.php", array("downloadTools"=>$downloadTools));
 
 	if (isset($_POST['addCategory'])) {
 
@@ -26,6 +19,6 @@
 
 	}
 
-  require_once($fullPath."/admin/themes/".$pageTools->getTheme("admin")."/templates/corePage.inc.php");
+  $page->render("corePage.inc.php");
 
 ?>

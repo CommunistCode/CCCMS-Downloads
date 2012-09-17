@@ -1,16 +1,12 @@
 <?php 
 
-	require_once("../../config/config.php");
-	require_once($fullPath . "/admin/includes/global.inc.php");
-	require_once($fullPath . "/admin/includes/checkLogin.inc.php");
+  require_once("includes/downloadAdminGlobal.inc.php");
 
-  $pageTools = new pageTools();
+  $page->set("title","Download Management");
+  $page->set("heading","Download Management");
+  $page->addContent("Welcome to download module admin area");
+  $page->render("corePage.inc.php");
 
-  $title = "Admin : Download Module";
-  $heading = "Download Module";
-  $content = "Welcome to download module admin area";
-
-  require_once($fullPath."/admin/themes/".$pageTools->getTheme("admin")."/templates/corePage.inc.php");
 
 ?>
 
